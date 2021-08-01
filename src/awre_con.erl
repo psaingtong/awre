@@ -106,7 +106,7 @@ close_connection(Pid) ->
 handle_call({awre_call,Msg},From,State) ->
   handle_message_from_client(Msg,From,State);
 handle_call(_Msg,_From,State) ->
-  {noreply,State}.
+  {reply,State}.
 
 
 handle_cast({awre_out,Msg}, State) ->
@@ -161,25 +161,25 @@ handle_message_from_client({connect,Host,Port,Realm,Encoding}=Msg,From,
                            {T,NewTState}
                        end,
   {_,NewState} = create_ref_for_message(Msg,From,#{},State),
-  {noreply,NewState#state{transport={Trans,TState}}};
+  {reply,NewState#state{transport={Trans,TState}}};
 handle_message_from_client({subscribe,Options,Topic,Mfa},From,State) ->
   {ok,NewState} = send_and_ref({subscribe,request_id,Options,Topic},From,#{mfa => Mfa},State),
-  {noreply,NewState};
+  {reply,NewState};
 handle_message_from_client({unsubscribe,SubscriptionId},From,State) ->
   {ok,NewState} = send_and_ref({unsubscribe,request_id,SubscriptionId},From,#{sub_id=>SubscriptionId},State),
-  {noreply,NewState};
+  {reply,NewState};
 handle_message_from_client({publish,Options,Topic,Arguments,ArgumentsKw},From,State) ->
   {ok,NewState} = send_and_ref({publish,request_id,Options,Topic,Arguments,ArgumentsKw},From,#{},State),
   {reply,ok,NewState};
 handle_message_from_client({register,Options,Procedure,Mfa},From,State) ->
   {ok,NewState} = send_and_ref({register,request_id,Options,Procedure},From,#{mfa=>Mfa},State),
-  {noreply,NewState};
+  {reply,NewState};
 handle_message_from_client({unregister,RegistrationId},From,State) ->
   {ok,NewState} = send_and_ref({unregister,request_id,RegistrationId},From,#{reg_id => RegistrationId},State),
-  {noreply,NewState};
+  {reply,NewState};
 handle_message_from_client({call,Options,Procedure,Arguments,ArgumentsKw},From,State) ->
   {ok,NewState} = send_and_ref({call,request_id,Options,Procedure,Arguments,ArgumentsKw},From,#{},State),
-  {noreply,NewState};
+  {reply,NewState};
 handle_message_from_client({yield,_,_,_,_}=Msg,_From,State) ->
   {ok,NewState} = send_to_router(Msg,State),
   {reply,ok,NewState};
@@ -187,7 +187,7 @@ handle_message_from_client({error,invocation,RequestId,ArgsKw,ErrorUri},_From,St
   {ok,NewState} = send_to_router({error,invocation,RequestId,#{},ErrorUri,[],ArgsKw},State),
   {reply,ok,NewState};
 handle_message_from_client(_Msg,_From,State) ->
-  {noreply,State}.
+  {reply,State}.
 
 
 
